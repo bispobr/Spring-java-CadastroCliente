@@ -1,283 +1,352 @@
-#  API  de Cadastro para Cliente & Contato 
-## Descrição
-API RESTful para gerenciamento de **clientes** e seus **contatos**. Permitindo realizar operações CRUD (criação, leitura, atualização e remoção) de clientes com foco em boas práticas, segurança, observailidade e observabilidade e manutenibilidade.
+# API de Cadastro de Clientes e Contatos
 
----
-## 📝 Funcionalidades
+API REST desenvolvida em Java e Spring Boot para gerenciamento de clientes e seus contatos. A aplicação oferece operações de cadastro, consulta, atualização e remoção lógica, com paginação, filtros de busca e associação entre clientes e contatos.
 
-- CRUD de clientes com Soft Delete, paginação e filtros por nome e email
-- CRUD de contatos com vínculo obrigatório a cliente e listagem paginada
-- Autenticação via JWT com endpoints protegidos por Spring Security e controle por roles (RBAC)
-- Padronização de respostas da API com wrapper (success, data, errors, meta)
-- Logs estruturados em JSON, métricas com Actuator, integração com Prometheus e dashboards no Grafana
-- Auditoria automática com createdAt, updatedAt, createdBy e deletedAt
-- Controle de acesso e rastreabilidade de operações sensíveis
-- CORS configurável por ambiente (origins, headers, métodos)
-- Suporte a profiles dev, test e prod com configurações isoladas
-- Migração de banco versionada com Flyway
-- Testes unitários e de integração com JUnit 5 e Mockito
-- Documentação da API com Swagger/OpenAPI
-- Containerização com Docker e docker-compose
-- Uso de MapStruct para mapeamento entre DTOs e entidades
-- Lombok para redução de boilerplate
+O projeto também implementa autenticação JWT, autorização com Spring Security e controle de acesso por roles, auditoria, respostas padronizadas, documentação OpenAPI e monitoramento.
 
----
-## 🛠️  Tecnologias
+## Funcionalidades
 
-- Java 21 + Spring Boot
-- Spring Security + JWT
-- Spring Data JPA
-- PostgreSQL / H2
-- Flyway
-- MapStruct
-- Jacoco
-- Lombok
-- Actuator
-- Micrometer + Prometheus
-- Grafana
-- Swagger / OpenAPI
-- Docker
-- Maven
+- Cadastro, consulta, atualização e remoção lógica de clientes.
+- Listagem paginada de clientes e seus contatos.
+- Busca de clientes por CPF completo ou parcial.
+- Cadastro, consulta, atualização e remoção lógica de contatos.
+- Associação obrigatória de cada contato a um cliente.
+- Listagem paginada de contatos.
+- Busca de contatos por e-mail completo ou parcial.
+- Consulta dos contatos vinculados a um cliente específico.
+- Registro e autenticação de usuários com JWT.
+- Controle de acesso com Spring Security e roles.
+- Validação dos dados de entrada.
+- Respostas padronizadas para sucesso, erros e metadados de paginação.
+- Auditoria de criação, atualização e remoção de registros.
+- Configuração de CORS por ambiente.
+- Migrações de banco de dados com Flyway.
+- Logs estruturados em JSON.
+- Métricas e monitoramento com Spring Boot Actuator, Prometheus e Grafana.
+- Documentação interativa com OpenAPI e Swagger UI.
+- Testes unitários e de integração.
 
----
+## Tecnologias
 
-## 📦 Requisitos
+- **Linguagem:** Java 21
+- **Framework:** Spring Boot 3.4
+- **API REST:** Spring Web e Bean Validation
+- **Segurança:** Spring Security e JWT (java-jwt)
+- **Persistência:** Spring Data JPA / Hibernate
+- **Banco de dados:** PostgreSQL e H2
+- **Migrações:** Flyway
+- **Mapeamento:** MapStruct
+- **Documentação:** Springdoc OpenAPI / Swagger UI
+- **Observabilidade:** Spring Boot Actuator, Micrometer, Prometheus e Grafana
+- **Logs:** Logback e Logstash Logback Encoder
+- **Testes e cobertura:** Spring Boot Test, Spring Security Test, JUnit, Mockito e JaCoCo
+- **Containerização:** Docker e Docker Compose
+- **Build:** Maven
+- **Utilitários:** Lombok
+
+## Requisitos
 
 - Java 21
 - Maven
-- PostgreSQL
-- Docker(opcional)
+- PostgreSQL para execução local
+- Docker e Docker Compose (opcionais, para execução em containers)
 
----
+## Como executar
 
-# ▶️ Como Executar
-## Executando o Projeto (Sem docker)
+### Execução local
 
 1. Clone o repositório:
 
-```bash
-git hhttps://github.com/bispobr/Java-Spring-cadastroCliente.git
-```
+   ```bash
+   git clone https://github.com/bispobr/Spring-java-CadastroCliente.git
+   ```
 
-2. Configure o arquivo  **.env** com as credenciais do seu PostgreSQL.
+2. Acesse a pasta do projeto:
 
-3. Execute a aplicação:
+   ```bash
+   cd Spring-java-CadastroCliente
+   ```
 
-```bash
-mvn spring-boot:run
-```
----
+3. Crie um arquivo `.env` na raiz do projeto, utilizando `.env.example` como referência. Para o perfil `dev`, configure as variáveis:
 
-## Executando com Docker (Opcional)
+   ```dotenv
+   DEV_Database_url=jdbc:postgresql://localhost:5432/clientes_contatos
+   DEV_Postgres_User=postgres
+   DEV_Postgres_Password=sua_senha
+   ```
 
+   Crie previamente o banco de dados indicado na URL e ajuste os valores conforme seu ambiente.
 
-1. Gere a imagem Docker e inicie o container:
+4. Execute a aplicação:
+
+   ```bash
+   mvn spring-boot:run
+   ```
+
+A configuração padrão utiliza o perfil `dev`. O projeto também possui configurações para os perfis `test` e `prod`.
+
+### Execução com Docker Compose
+
+Na raiz do projeto, execute:
 
 ```bash
 docker compose up --build
 ```
----
 
-## Acessando a API (Localmente)
+O ambiente inicia a aplicação, o PostgreSQL, o Prometheus e o Grafana.
 
+Para encerrar os serviços:
 
-- **Base URL:** http://localhost:8080
-- **Documentação (Swagger):**  http://localhost:8080/swagger-ui/index.html#/
-- **Health Check (Actuator):**  http://localhost:8080/actuator/health
--  **Grafana (Docker):**  http://localhost:3000
-- - usuario: admin
-- - senha: admin
-- **Prometheus (Docker):**  http://localhost:9090
----
+```bash
+docker compose down
+```
 
-## Endpoints da API
+## Autenticação
 
-### 🔑 Autenticação
+As rotas de autenticação são disponibilizadas pelo prefixo `/auth`. As demais rotas de gerenciamento exigem um token JWT.
 
-1. Registrar Usuário
+| Método | Endpoint | Descrição |
+| --- | --- | --- |
+| `POST` | `/auth/register` | Registra um usuário. |
+| `POST` | `/auth/login` | Autentica um usuário e retorna um token JWT. |
 
-```http request
+### Registrar usuário
+
+**Requisição**
+
+```http
 POST /auth/register
 Content-Type: application/json
 ```
 
-Body
+**Corpo**
 
-```http
+```json
 {
-  "name": "string",
-  "email": "string",
-  "password": "string",
-  "role": "ROLE_ADMIN"
+  "name": "Nome do usuário",
+  "email": "usuario@example.com",
+  "password": "senha",
+  "role": "ROLE_USER"
 }
 ```
 
----
+O campo `role` é opcional. Quando não informado, o usuário recebe a role `ROLE_USER`.
 
-2. Obter Token JWT
+### Obter token JWT
+
+**Requisição**
 
 ```http
 POST /auth/login
 Content-Type: application/json
 ```
 
-Body
+**Corpo**
+
+```json
+{
+  "email": "usuario@example.com",
+  "password": "senha"
+}
+```
+
+Utilize o token retornado nas requisições protegidas, no cabeçalho:
 
 ```http
-{
- "email": "string",
-  "password": "string"
-}
+Authorization: Bearer <token>
 ```
 
----
+No Swagger UI, clique em **Authorize** e informe o token para testar os endpoints protegidos.
 
-3. **Usar token no Swagger**
-4. Clique em Authorize
-5. informe o token obtido
+## Endpoints de clientes
 
----
+Todas as rotas abaixo utilizam o prefixo `/clientes`.
 
+| Método | Endpoint | Descrição |
+| --- | --- | --- |
+| `POST` | `/clientes` | Cadastra um cliente. |
+| `GET` | `/clientes` | Lista clientes com paginação. |
+| `GET` | `/clientes/buscar` | Busca clientes por CPF completo ou parcial, com paginação. |
+| `PUT` | `/clientes/{id}` | Atualiza os dados de um cliente. |
+| `DELETE` | `/clientes/remover/{id}` | Realiza a remoção lógica de um cliente. |
 
-### comunicacao Controller
+### Cadastrar cliente
 
-#### **Cliente Controller**
-
-1. **Criar Cliente**
-
-```http request
-POST /cliente 
+```http
+POST /clientes
 Content-Type: application/json
+Authorization: Bearer <token>
 ```
 
-**Body**
+**Corpo**
 
-```http request
+```json
 {
-  "nome": "string",
-  "cpf": "string"
+  "nome": "Nome do cliente",
+  "cpf": "00000000000"
 }
 ```
-| Parâmetro | Tipo       | Descrição                           |
-|:----------| :--------- | :---------------------------------- |
-| `nome`    | `String` |   Nome do cliente(**Obrigatório**)
-| `cpf`     | `String` |   Cpf do cliente(**Obrigatório**) 
----
 
-2. **Buscar Clientes**: Retorna a lista de clientes pelo cpf completo ou parcial com paginação (Usuario Admin Autenticado)
+Os campos `nome` e `cpf` são obrigatórios.
 
-```http request
+### Listar clientes
+
+```http
+GET /clientes?page=0&size=10
+Authorization: Bearer <token>
+```
+
+### Buscar clientes por CPF
+
+```http
 GET /clientes/buscar?cpf=00000000000&page=0&size=10
+Authorization: Bearer <token>
 ```
----
-3. **Listagem Clientes**: Retorna a lista de clientes e seus contatos com paginação
 
-```http request
-GET /clientes/?page=0&size=10
-```
----
+O parâmetro `cpf` aceita uma busca completa ou parcial. Os parâmetros `page` e `size` controlam a paginação; os valores padrão são `0` e `10`, respectivamente.
 
-4. **Atualizar Cliente** : atualiza informações do cliente
+### Atualizar cliente
 
-```http request
+```http
 PUT /clientes/{id}
-```
-**Body:**
-
-```http request
-{
-  "nome": "string",
-  "cpf": "string"
-}
-```
-
-| Parâmetro | Tipo       | Descrição                           |
-|:----------| :--------- | :---------------------------------- |
-| `nome`    | `String` | **Opcional**. O nome do cliente 
-| `cpf`     | `String` | **Opcional**. O cpf do cliente 
-
-4. **Remover Cliente** Soft Delete
-
-```http request
-DELETE /clientes/remover/{id}
-```
----
-### Contato Controller
-
-#### **Contatos**
-
-1. **Cadastrar Contato**
-```http request
-POST /contatos - Cadastra um novo contato.
 Content-Type: application/json
+Authorization: Bearer <token>
 ```
-**Body:**
 
-```http request
+**Corpo**
+
+```json
 {
-  "clienteId": 0,
-  "telefone": "string",
-  "email": "string"
+  "nome": "Nome atualizado",
+  "cpf": "00000000000"
 }
 ```
 
-| Parâmetro   | Tipo     | Descrição                           |
-| :---------- |:---------| :---------------------------------- |
-| `telefone` | `String` | **Obrigatório**. O telefone do cliente 
-| `email` | `String` | **Obrigatório**. O email do cliente 
-| `clienteId` | `Long`   | **Obrigatório**. O id do cliente 
----
+Os campos de atualização são opcionais, conforme o DTO utilizado pela aplicação.
 
+### Remover cliente
 
-2. **Buscar Contatos**: Retorna uma lista de contatos pelo email completo ou parcial com paginação
-```http request
-GET /contatos/buscar?email=email&page=0&size=10
-
-```
----
-
-
-3. **Listar Contatos**: Retorna uma lista de contatos na base de dados com paginação
-```http request
-GET /contatos/contatos?page=0&size=10'
-
-```
----
-
-4. **Listar Contatos de um Cliente:** Retorna todos os contatos associados a um cliente específico. 
-
-```http request
-GET /contatos/{id} - listagem de contatos de um cliente existente.
-
+```http
+DELETE /clientes/remover/{id}
+Authorization: Bearer <token>
 ```
 
-5. **Atualizar Contato**
+A operação realiza soft delete, mantendo o registro no banco de dados com indicação de remoção.
 
-```http request
+## Endpoints de contatos
+
+Todas as rotas abaixo utilizam o prefixo `/contatos`.
+
+| Método | Endpoint | Descrição |
+| --- | --- | --- |
+| `POST` | `/contatos` | Cadastra um contato associado a um cliente. |
+| `GET` | `/contatos` | Lista contatos com paginação. |
+| `GET` | `/contatos/buscar` | Busca contatos por e-mail completo ou parcial, com paginação. |
+| `GET` | `/contatos/{id}` | Lista os contatos associados ao cliente informado. |
+| `PUT` | `/contatos/{id}` | Atualiza um contato. |
+| `DELETE` | `/contatos/remover/{id}` | Realiza a remoção lógica de um contato. |
+
+### Cadastrar contato
+
+```http
+POST /contatos
+Content-Type: application/json
+Authorization: Bearer <token>
+```
+
+**Corpo**
+
+```json
+{
+  "clienteId": 1,
+  "telefone": "11999999999",
+  "email": "contato@example.com"
+}
+```
+
+- `clienteId`: identificador do cliente ao qual o contato será associado, obrigatório.
+- `telefone`: telefone do contato, obrigatório.
+- `email`: endereço de e-mail válido, obrigatório.
+
+### Listar contatos
+
+```http
+GET /contatos?page=0&size=10
+Authorization: Bearer <token>
+```
+
+### Buscar contatos por e-mail
+
+```http
+GET /contatos/buscar?email=contato@example.com&page=0&size=10
+Authorization: Bearer <token>
+```
+
+O parâmetro `email` aceita uma busca completa ou parcial. A paginação utiliza `page` e `size`, com valores padrão `0` e `10`.
+
+### Listar contatos de um cliente
+
+```http
+GET /contatos/{id}
+Authorization: Bearer <token>
+```
+
+O identificador informado corresponde ao cliente cujos contatos serão listados.
+
+### Atualizar contato
+
+```http
 PUT /contatos/{id}
+Content-Type: application/json
+Authorization: Bearer <token>
 ```
 
-**Body:**
+**Corpo**
 
-```http request
+```json
 {
-  "telefone": "string",
-  "email": "string"
+  "telefone": "11988887777",
+  "email": "novo-contato@example.com"
 }
 ```
 
-| Parâmetro | Tipo       | Descrição                           |
-|:----------| :--------- | :---------------------------------- |
-| `nome`    | `String` | **Opcional**. O telefone  
-| `cpf`     | `String` | **Opcional**. O email  
+### Remover contato
 
----
-6. **Remover Contato** Remove um contato existente (Soft Delete)
-
-```http request
-DELETE /contatos/remover/{id}  
+```http
+DELETE /contatos/remover/{id}
+Authorization: Bearer <token>
 ```
 
+A operação realiza soft delete do contato.
 
+## Respostas da API
 
+As operações utilizam um formato padronizado de resposta, com estrutura para indicar sucesso, dados retornados, erros e metadados. Nas operações de listagem paginada, os metadados incluem informações da paginação.
 
+## Documentação e monitoramento
+
+Com a aplicação em execução, os serviços ficam disponíveis nos endereços padrão:
+
+| Serviço | URL |
+| --- | --- |
+| API | http://localhost:8080 |
+| Swagger UI | http://localhost:8080/swagger-ui/index.html |
+| Actuator Health | http://localhost:8080/actuator/health |
+| Prometheus | http://localhost:9090 |
+| Grafana | http://localhost:3000 |
+
+O Actuator disponibiliza informações de saúde e métricas. O Prometheus coleta métricas da aplicação, e o Grafana utiliza o Prometheus como fonte de dados.
+
+## Testes
+
+Para executar os testes automatizados:
+
+```bash
+mvn test
+```
+
+O projeto contém testes unitários e de integração para os controladores e serviços, utilizando JUnit, Mockito e Spring Boot Test. O JaCoCo está configurado para gerar relatório de cobertura durante a execução dos testes.
+
+## Estrutura do projeto
+
+O código está organizado por responsabilidades, incluindo configurações de CORS, banco de dados, OpenAPI e segurança; controladores REST; DTOs de requisição e resposta; entidades e enums; repositórios; serviços; componentes de auditoria, logs e respostas padronizadas. O projeto também contém migrações Flyway, configurações por perfil, testes automatizados e arquivos de Docker e monitoramento.
